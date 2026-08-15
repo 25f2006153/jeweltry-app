@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "452179028273",
+    "project_id": "gen-lang-client-0608042342",
+    "storage_bucket": "gen-lang-client-0608042342.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452179028273:android:jeweltry001",
+        "android_client_info": {
+          "package_name": "com.jeweltry.jewel_try"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "452179028273-lkhh0t19mm85gu09slimfvuar07sjip4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDummyClientKeyForAndroidGoogleServicesJson"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "452179028273-lkhh0t19mm85gu09slimfvuar07sjip4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
