@@ -4,11 +4,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService extends ChangeNotifier {
   final SupabaseClient _supabase = Supabase.instance.client;
+  static const String _googleClientId =
+      '452179028273-lkhh0t19mm85gu09slimfvuar07sjip4.apps.googleusercontent.com';
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    serverClientId: '452179028273-lkhh0t19mm85gu09slimfvuar07sjip4.apps.googleusercontent.com',
-    scopes: ['email', 'profile'],
-  );
+  late final GoogleSignIn _googleSignIn = _createGoogleSignIn();
+
+  GoogleSignIn _createGoogleSignIn() => GoogleSignIn(
+        clientId: kIsWeb ? _googleClientId : null,
+        serverClientId: kIsWeb ? null : _googleClientId,
+        scopes: ['email', 'profile'],
+      );
 
   User? get currentUser => _supabase.auth.currentUser;
   bool get isLoggedIn => currentUser != null;
