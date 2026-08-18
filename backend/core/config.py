@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "JewelTry Backend"
     APP_ENV: str = "production"
     DEBUG: bool = False
-    CORS_ORIGINS: List[str] = ["https://jeweltry.app", "http://localhost:8080"]
+    CORS_ORIGINS: List[str] = ["*", "https://jeweltry-app.vercel.app", "https://jeweltry.app", "http://localhost:8080"]
     
     # Supabase Configuration
     SUPABASE_URL: str = "http://localhost:54321"

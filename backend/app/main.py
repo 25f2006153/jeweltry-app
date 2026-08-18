@@ -15,11 +15,11 @@ async def startup_event():
     # Validate configured AI_MODEL supports image generation operations
     validate_ai_model_compatibility(settings.AI_MODEL)
 
-# Configure CORS
+# Configure CORS for all web and mobile clients
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
