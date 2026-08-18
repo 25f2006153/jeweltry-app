@@ -193,6 +193,7 @@ async def initiate_try_on(
     )
 
 @router.get("/{request_id}", response_model=TryOnResponse)
+@router.get("/status/{request_id}", response_model=TryOnResponse)
 async def get_try_on_status(
     request_id: str,
     user: AuthUser = Depends(get_current_user),
