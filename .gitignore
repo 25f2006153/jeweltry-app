@@ -9,6 +9,10 @@ build/
 !build/web/
 !build/web/**
 
+# Whitelist public deployment folder completely
+!public/
+!public/**
+
 # Python & FastAPI
 __pycache__/
 *.py[cod]
@@ -25,14 +29,6 @@ ENV/
 .env
 .env.local
 .env.*.local
-*.json
-!pubspec.json
-!package.json
-!tsconfig.json
-!google-services.json
-!manifest.json
-!version.json
-!vercel.json
 service-account*.json
 google-service-account*.json
 *.pem
@@ -44,3 +40,4 @@ google-service-account*.json
 .idea/
 *.swp
 *.swo
+
