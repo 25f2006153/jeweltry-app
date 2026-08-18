@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/constants/app_config.dart';
 import '../core/constants/app_colors.dart';
 
 class CreditTopupSheet extends StatefulWidget {
@@ -62,8 +66,31 @@ class _CreditTopupSheetState extends State<CreditTopupSheet> {
   Future<void> _handlePayment() async {
     setState(() => _isProcessing = true);
 
-    // Simulate online UPI / Payment gateway checkout
-    await Future.delayed(const Duration(milliseconds: 1500));
+    try {
+      final selectedPlan = _plans.firstWhere(
+        (p) => p['id'] == _selectedPlanId,
+        orElse: () => _plans[1],
+      );
+      final credits = selectedPlan['credits'] as int? ?? 12;
+
+      String token = 'mock-dev-token';
+      try {
+        final sessionToken = Supabase.instance.client.auth.currentSession?.accessToken;
+        if (sessionToken != null && sessionToken.isNotEmpty) {
+          token = sessionToken;
+        }
+      } catch (_) {}
+
+      // Call backend to add credits to wallet
+      await http.post(
+        Uri.parse('${AppConfig.backendBaseUrl}/api/credits/topup'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'amount': credits}),
+      );
+    } catch (_) {}
 
     if (!mounted) return;
 

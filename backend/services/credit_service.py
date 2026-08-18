@@ -30,7 +30,7 @@ class CreditService:
 
         # Thread-safe in-memory atomic reservation lock
         with _mock_lock:
-            wallet = _mock_wallets.setdefault(user_id, {'balance': 1, 'reserved': 0})
+            wallet = _mock_wallets.setdefault(user_id, {'balance': 10, 'reserved': 0})
             available = wallet['balance'] - wallet['reserved']
             if available >= 1:
                 wallet['reserved'] += 1
@@ -112,7 +112,7 @@ class CreditService:
                 logger.error(f"Get credits error: {e}")
 
         with _mock_lock:
-            wallet = _mock_wallets.setdefault(user_id, {'balance': 1, 'reserved': 0})
+            wallet = _mock_wallets.setdefault(user_id, {'balance': 10, 'reserved': 0})
             return wallet['balance'], wallet['reserved']
 
     @staticmethod
@@ -129,7 +129,7 @@ class CreditService:
                 pass
 
         with _mock_lock:
-            wallet = _mock_wallets.setdefault(user_id, {'balance': 1, 'reserved': 0})
+            wallet = _mock_wallets.setdefault(user_id, {'balance': 10, 'reserved': 0})
             wallet['balance'] += amount
             return wallet['balance']
 
