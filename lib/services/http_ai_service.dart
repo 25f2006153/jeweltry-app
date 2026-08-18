@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/try_on_request.dart';
 import '../models/try_on_result.dart';
 import 'ai_service.dart';
@@ -31,46 +33,55 @@ class HttpAIService implements AIService {
       final uri = Uri.parse('$baseUrl/api/try-on');
       final httpRequest = http.MultipartRequest('POST', uri);
 
-      final token = authToken ?? 'mock-dev-token';
-      httpRequest.headers['Authorization'] = 'Bearer $token';
+      // Get real Supabase token if available, fallback to provided authToken or mock-dev-token
+      String token = authToken ?? 'mock-dev-token';
+      try {
+        final sessionToken = Supabase.instance.client.auth.currentSession?.accessToken;
+        if (sessionToken != null && sessionToken.isNotEmpty) {
+          token = sessionToken;
+        }
+      } catch (_) {}
 
+      httpRequest.headers['Authorization'] = 'Bearer $token';
       httpRequest.fields['jewelry_type'] = request.jewelryType.name;
       httpRequest.fields['request_id'] = DateTime.now().millisecondsSinceEpoch.toString();
 
-      // On web: send bytes directly (blob URLs can't be fetched by server)
-      // On mobile: send file path or HTTP URL
-      if (kIsWeb) {
-        // Web: use pre-read bytes stored in request
-        if (request.userImageBytes != null) {
-          httpRequest.files.add(http.MultipartFile.fromBytes(
-            'user_image',
-            request.userImageBytes!,
-            filename: 'user_photo.jpg',
-          ));
-        }
-        if (request.jewelryImageBytes != null) {
-          httpRequest.files.add(http.MultipartFile.fromBytes(
-            'jewelry_image',
-            request.jewelryImageBytes!,
-            filename: 'jewelry_photo.jpg',
-          ));
-        }
-      } else {
-        // Mobile/Desktop: use file path or HTTP URL
-        if (request.userImagePath.startsWith('http')) {
-          httpRequest.fields['user_image_url'] = request.userImagePath;
-        } else if (File(request.userImagePath).existsSync()) {
-          httpRequest.files.add(
-            await http.MultipartFile.fromPath('user_image', request.userImagePath),
-          );
-        }
-        if (request.jewelryImagePath.startsWith('http')) {
-          httpRequest.fields['jewelry_image_url'] = request.jewelryImagePath;
-        } else if (File(request.jewelryImagePath).existsSync()) {
-          httpRequest.files.add(
-            await http.MultipartFile.fromPath('jewelry_image', request.jewelryImagePath),
-          );
-        }
+      // Read user image bytes (handles picked bytes, bundled asset, or file)
+      Uint8List? userBytes = request.userImageBytes;
+      if (userBytes == null && request.userImagePath.startsWith('assets/')) {
+        final byteData = await rootBundle.load(request.userImagePath);
+        userBytes = byteData.buffer.asUint8List();
+      }
+
+      // Read jewelry image bytes (handles picked bytes, bundled asset, or file)
+      Uint8List? jewelryBytes = request.jewelryImageBytes;
+      if (jewelryBytes == null && request.jewelryImagePath.startsWith('assets/')) {
+        final byteData = await rootBundle.load(request.jewelryImagePath);
+        jewelryBytes = byteData.buffer.asUint8List();
+      }
+
+      if (userBytes != null && userBytes.isNotEmpty) {
+        httpRequest.files.add(http.MultipartFile.fromBytes(
+          'user_image',
+          userBytes,
+          filename: 'user_photo.jpg',
+        ));
+      } else if (!kIsWeb && File(request.userImagePath).existsSync()) {
+        httpRequest.files.add(
+          await http.MultipartFile.fromPath('user_image', request.userImagePath),
+        );
+      }
+
+      if (jewelryBytes != null && jewelryBytes.isNotEmpty) {
+        httpRequest.files.add(http.MultipartFile.fromBytes(
+          'jewelry_image',
+          jewelryBytes,
+          filename: 'jewelry_photo.jpg',
+        ));
+      } else if (!kIsWeb && File(request.jewelryImagePath).existsSync()) {
+        httpRequest.files.add(
+          await http.MultipartFile.fromPath('jewelry_image', request.jewelryImagePath),
+        );
       }
 
       final streamedResponse = await httpRequest.send();

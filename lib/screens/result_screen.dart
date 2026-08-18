@@ -103,11 +103,7 @@ class ResultScreen extends StatelessWidget {
                       child: InteractiveViewer(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
-                          child: Image.asset(
-                            resultPath.startsWith('assets/') ? resultPath : resultPath,
-                            fit: BoxFit.contain,
-                            errorBuilder: (ctx, err, stack) => Image.network(resultPath),
-                          ),
+                          child: ResultImageCard(imagePath: resultPath),
                         ),
                       ),
                     ),

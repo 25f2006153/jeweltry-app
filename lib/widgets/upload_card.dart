@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,14 +25,29 @@ class UploadCard extends StatelessWidget {
   bool get hasImage => imagePath != null && imagePath!.isNotEmpty;
 
   Widget _buildImageWidget(String path) {
-    if (path.startsWith('assets/')) {
+    if (path.startsWith('data:image')) {
+      try {
+        final commaIndex = path.indexOf(',');
+        final base64Data = commaIndex != -1 ? path.substring(commaIndex + 1) : path;
+        return Image.memory(
+          base64Decode(base64Data),
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          errorBuilder: (context, error, stackTrace) => _buildErrorFallback(),
+        );
+      } catch (e) {
+        return _buildErrorFallback();
+      }
+    } else if (path.startsWith('assets/')) {
       return Image.asset(
         path,
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
+        errorBuilder: (context, error, stackTrace) => _buildErrorFallback(),
       );
-    } else if (kIsWeb || path.startsWith('http://') || path.startsWith('https://')) {
+    } else if (kIsWeb || path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:')) {
       return Image.network(
         path,
         fit: BoxFit.cover,
@@ -47,6 +63,7 @@ class UploadCard extends StatelessWidget {
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
+          errorBuilder: (context, error, stackTrace) => _buildErrorFallback(),
         );
       }
       return _buildErrorFallback();

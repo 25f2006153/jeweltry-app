@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,14 +15,41 @@ class ResultImageCard extends StatelessWidget {
   });
 
   Widget _buildImageWidget(String path) {
+    if (path.isEmpty) {
+      return _buildErrorWidget();
+    }
+    
+    // 1. Base64 Data URI from AI Backend
+    if (path.startsWith('data:image')) {
+      try {
+        final commaIndex = path.indexOf(',');
+        final base64Data = commaIndex != -1 ? path.substring(commaIndex + 1) : path;
+        final bytes = base64Decode(base64Data);
+        return Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+        );
+      } catch (e) {
+        return _buildErrorWidget();
+      }
+    }
+
+    // 2. Bundled Asset
     if (path.startsWith('assets/')) {
       return Image.asset(
         path,
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
+        errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
       );
-    } else if (kIsWeb || path.startsWith('http://') || path.startsWith('https://')) {
+    } 
+    
+    // 3. Network URL / Web Blob
+    if (path.startsWith('http://') || path.startsWith('https://') || (kIsWeb && path.startsWith('blob:'))) {
       return Image.network(
         path,
         fit: BoxFit.cover,
@@ -29,7 +57,10 @@ class ResultImageCard extends StatelessWidget {
         height: double.infinity,
         errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
       );
-    } else {
+    } 
+    
+    // 4. Local File (Mobile/Desktop)
+    if (!kIsWeb) {
       final file = File(path);
       if (file.existsSync()) {
         return Image.file(
@@ -37,10 +68,12 @@ class ResultImageCard extends StatelessWidget {
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
+          errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
         );
       }
-      return _buildErrorWidget();
     }
+
+    return _buildErrorWidget();
   }
 
   Widget _buildErrorWidget() {
