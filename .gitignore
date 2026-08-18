@@ -6,6 +6,8 @@
 .pub-cache/
 .pub/
 build/
+!build/web/
+!build/web/**
 
 # Python & FastAPI
 __pycache__/
