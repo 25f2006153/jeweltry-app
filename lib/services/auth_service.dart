@@ -32,6 +32,15 @@ class AuthService extends ChangeNotifier {
   /// Sign in with Google
   Future<bool> signInWithGoogle() async {
     try {
+      if (kIsWeb) {
+        // On Web, use Supabase OAuth which seamlessly handles redirect / popup
+        return await _supabase.auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: kIsWeb ? Uri.base.origin : null,
+          authScreenLaunchMode: LaunchMode.platformDefault,
+        );
+      }
+
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return false; // User cancelled
 
