@@ -68,10 +68,14 @@ async def process_ai_try_on_task(
             expires_in=settings.SIGNED_URL_EXPIRATION_SECONDS
         )
 
+        # Fallback to direct base64 data URI if signed URL is unavailable
+        b64_uri = f"data:image/jpeg;base64,{base64.b64encode(result_bytes).decode('utf-8')}"
+        final_image_url = signed_url if (signed_url and (signed_url.startswith("http://") or signed_url.startswith("https://"))) else b64_uri
+
         # Update in-memory & DB record
         _generations_store[request_id].update({
             'status': 'completed',
-            'result_image_url': signed_url,
+            'result_image_url': final_image_url,
             'result_path': result_path,
             'credits_remaining': new_balance,
         })
@@ -167,11 +171,23 @@ async def initiate_try_on(
     _generations_store[req_id] = {
         'request_id': req_id,
         'user_id': user.id,
-        'status': 'pending',
+        'status': 'processing',
         'result_image_url': None,
         'credits_remaining': balance,
         'error_message': None,
     }
+
+    client = get_supabase_client()
+    if client is not None:
+        try:
+            client.table('try_on_generations').insert({
+                'id': req_id,
+                'user_id': user.id,
+                'status': 'processing',
+                'jewelry_type': jewelry_type,
+            }).execute()
+        except Exception as e:
+            logger.warning(f"Initial DB insert non-critical warning: {e}")
 
     # Queue AI processing in background task
     background_tasks.add_task(

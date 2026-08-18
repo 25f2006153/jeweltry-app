@@ -99,15 +99,17 @@ class StorageService:
                     path=clean_path,
                     expires_in=expires_in
                 )
-                if isinstance(res, dict) and 'signedURL' in res:
-                    return res['signedURL']
-                elif hasattr(res, 'signed_url'):
+                if isinstance(res, dict):
+                    url = res.get('signedURL') or res.get('signedUrl') or res.get('signed_url')
+                    if url:
+                        return url
+                elif hasattr(res, 'signed_url') and res.signed_url:
                     return res.signed_url
             except Exception as e:
-                logger.error(f"Error creating signed URL for {clean_path}: {e}")
+                logger.warning(f"Signed URL creation warning for {clean_path}: {e}")
 
-        # Fallback signed URL format for dev mode
-        return f"https://mock-supabase.storage/signed/{RESULTS_BUCKET}/{clean_path}?token=exp_{expires_in}_user_{user_id}"
+        # If generation_id_or_path is already base64 or if file exists
+        return generation_id_or_path
 
     @staticmethod
     def delete_temporary_request_folder(user_id: str, request_id: str):
