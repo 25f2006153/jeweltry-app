@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/try_on_request.dart';
 import '../models/try_on_result.dart';
@@ -65,6 +66,7 @@ class HttpAIService implements AIService {
           'user_image',
           userBytes,
           filename: 'user_photo.jpg',
+          contentType: MediaType('image', 'jpeg'),
         ));
       } else if (!kIsWeb && File(request.userImagePath).existsSync()) {
         httpRequest.files.add(
@@ -77,6 +79,7 @@ class HttpAIService implements AIService {
           'jewelry_image',
           jewelryBytes,
           filename: 'jewelry_photo.jpg',
+          contentType: MediaType('image', 'jpeg'),
         ));
       } else if (!kIsWeb && File(request.jewelryImagePath).existsSync()) {
         httpRequest.files.add(

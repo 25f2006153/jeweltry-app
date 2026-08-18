@@ -121,8 +121,10 @@ async def initiate_try_on(
             detail=f"Insufficient credits. Balance: {balance}, Available: {available_credits}. Gemini API call blocked.",
         )
 
-    # Validate MIME types
-    if user_image.content_type not in ALLOWED_MIMES or jewelry_image.content_type not in ALLOWED_MIMES:
+    # Validate MIME types (allow web blob and stream types)
+    valid_mimes = ["image/jpeg", "image/png", "image/webp", "image/jpg", "application/octet-stream", "binary/octet-stream"]
+    if (user_image.content_type and user_image.content_type.lower() not in valid_mimes) or \
+       (jewelry_image.content_type and jewelry_image.content_type.lower() not in valid_mimes):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid image format. Supported formats: JPG, PNG, WEBP",
