@@ -1,7 +1,14 @@
+import 'package:flutter/foundation.dart';
+
 /// App-wide configuration constants
 class AppConfig {
-  // Live Backend API URL (Render.com deployment)
-  static const String backendBaseUrl = 'https://jeweltry-backend.onrender.com';
+  // Live Backend API URL (Uses same-origin reverse proxy on web, Render URL on native)
+  static String get backendBaseUrl {
+    if (kIsWeb) {
+      return Uri.base.origin;
+    }
+    return 'https://jeweltry-backend.onrender.com';
+  }
   
   // Supabase Configuration
   static const String supabaseUrl = 'https://ldzzgenjjukaoqgvfasz.supabase.co';
