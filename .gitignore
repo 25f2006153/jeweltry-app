@@ -30,6 +30,7 @@ ENV/
 !google-services.json
 !manifest.json
 !version.json
+!vercel.json
 service-account*.json
 google-service-account*.json
 *.pem
