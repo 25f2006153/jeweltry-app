@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../core/constants/app_assets.dart';
 import '../models/jewelry_type.dart';
@@ -12,6 +15,10 @@ class TryOnStateManager extends ChangeNotifier {
   String? _userImagePath = AppAssets.userSample;
   String? _jewelryImagePath = AppAssets.jewelryEarrings;
   JewelryType _selectedJewelryType = JewelryType.earrings;
+
+  // Web: store raw bytes since blob URLs can't be fetched server-side
+  Uint8List? _userImageBytes;
+  Uint8List? _jewelryImageBytes;
 
   bool _isGenerating = false;
   double _progress = 0.0;
@@ -37,14 +44,36 @@ class TryOnStateManager extends ChangeNotifier {
       _jewelryImagePath != null &&
       _jewelryImagePath!.isNotEmpty;
 
+  /// Set user image from XFile (handles both web bytes and mobile path)
+  Future<void> setUserImageFromXFile(XFile xfile) async {
+    _userImagePath = xfile.path;
+    if (kIsWeb) {
+      _userImageBytes = await xfile.readAsBytes();
+    }
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Set jewelry image from XFile (handles both web bytes and mobile path)
+  Future<void> setJewelryImageFromXFile(XFile xfile) async {
+    _jewelryImagePath = xfile.path;
+    if (kIsWeb) {
+      _jewelryImageBytes = await xfile.readAsBytes();
+    }
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   void setUserImagePath(String? path) {
     _userImagePath = path;
+    _userImageBytes = null;
     _errorMessage = null;
     notifyListeners();
   }
 
   void setJewelryImagePath(String? path) {
     _jewelryImagePath = path;
+    _jewelryImageBytes = null;
     _errorMessage = null;
     notifyListeners();
   }
@@ -57,6 +86,7 @@ class TryOnStateManager extends ChangeNotifier {
   /// Reset jewelry photo & result for "Try Another" flow while preserving user photo!
   void prepareTryAnother() {
     _jewelryImagePath = null;
+    _jewelryImageBytes = null;
     _lastResult = null;
     _progress = 0.0;
     _statusMessage = '';
@@ -67,6 +97,8 @@ class TryOnStateManager extends ChangeNotifier {
   void resetAll() {
     _userImagePath = AppAssets.userSample;
     _jewelryImagePath = AppAssets.jewelryEarrings;
+    _userImageBytes = null;
+    _jewelryImageBytes = null;
     _selectedJewelryType = JewelryType.earrings;
     _isGenerating = false;
     _progress = 0.0;
@@ -94,6 +126,8 @@ class TryOnStateManager extends ChangeNotifier {
         userImagePath: _userImagePath!,
         jewelryImagePath: _jewelryImagePath!,
         jewelryType: _selectedJewelryType,
+        userImageBytes: _userImageBytes,
+        jewelryImageBytes: _jewelryImageBytes,
       );
 
       final result = await _aiService.generateTryOn(

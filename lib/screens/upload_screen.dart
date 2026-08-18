@@ -19,23 +19,23 @@ class _UploadScreenState extends State<UploadScreen> {
   final ImagePickerService _pickerService = ImagePickerService();
 
   Future<void> _pickUserImageFromGallery(TryOnStateManager stateManager) async {
-    final path = await _pickerService.pickImageFromGallery();
-    if (path != null) {
-      stateManager.setUserImagePath(path);
+    final xfile = await _pickerService.pickImageFromGallery();
+    if (xfile != null) {
+      await stateManager.setUserImageFromXFile(xfile);
     }
   }
 
   Future<void> _captureUserImageFromCamera(TryOnStateManager stateManager) async {
-    final path = await _pickerService.captureImageFromCamera();
-    if (path != null) {
-      stateManager.setUserImagePath(path);
+    final xfile = await _pickerService.captureImageFromCamera();
+    if (xfile != null) {
+      await stateManager.setUserImageFromXFile(xfile);
     }
   }
 
   Future<void> _pickJewelryImageFromGallery(TryOnStateManager stateManager) async {
-    final path = await _pickerService.pickImageFromGallery();
-    if (path != null) {
-      stateManager.setJewelryImagePath(path);
+    final xfile = await _pickerService.pickImageFromGallery();
+    if (xfile != null) {
+      await stateManager.setJewelryImageFromXFile(xfile);
     }
   }
 

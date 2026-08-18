@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -36,22 +37,40 @@ class HttpAIService implements AIService {
       httpRequest.fields['jewelry_type'] = request.jewelryType.name;
       httpRequest.fields['request_id'] = DateTime.now().millisecondsSinceEpoch.toString();
 
-      // Read user image
-      if (kIsWeb || request.userImagePath.startsWith('http')) {
-        httpRequest.fields['user_image_url'] = request.userImagePath;
-      } else if (File(request.userImagePath).existsSync()) {
-        httpRequest.files.add(
-          await http.MultipartFile.fromPath('user_image', request.userImagePath),
-        );
-      }
-
-      // Read jewelry image
-      if (kIsWeb || request.jewelryImagePath.startsWith('http')) {
-        httpRequest.fields['jewelry_image_url'] = request.jewelryImagePath;
-      } else if (File(request.jewelryImagePath).existsSync()) {
-        httpRequest.files.add(
-          await http.MultipartFile.fromPath('jewelry_image', request.jewelryImagePath),
-        );
+      // On web: send bytes directly (blob URLs can't be fetched by server)
+      // On mobile: send file path or HTTP URL
+      if (kIsWeb) {
+        // Web: use pre-read bytes stored in request
+        if (request.userImageBytes != null) {
+          httpRequest.files.add(http.MultipartFile.fromBytes(
+            'user_image',
+            request.userImageBytes!,
+            filename: 'user_photo.jpg',
+          ));
+        }
+        if (request.jewelryImageBytes != null) {
+          httpRequest.files.add(http.MultipartFile.fromBytes(
+            'jewelry_image',
+            request.jewelryImageBytes!,
+            filename: 'jewelry_photo.jpg',
+          ));
+        }
+      } else {
+        // Mobile/Desktop: use file path or HTTP URL
+        if (request.userImagePath.startsWith('http')) {
+          httpRequest.fields['user_image_url'] = request.userImagePath;
+        } else if (File(request.userImagePath).existsSync()) {
+          httpRequest.files.add(
+            await http.MultipartFile.fromPath('user_image', request.userImagePath),
+          );
+        }
+        if (request.jewelryImagePath.startsWith('http')) {
+          httpRequest.fields['jewelry_image_url'] = request.jewelryImagePath;
+        } else if (File(request.jewelryImagePath).existsSync()) {
+          httpRequest.files.add(
+            await http.MultipartFile.fromPath('jewelry_image', request.jewelryImagePath),
+          );
+        }
       }
 
       final streamedResponse = await httpRequest.send();

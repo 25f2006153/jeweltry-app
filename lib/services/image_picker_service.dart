@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 class ImagePickerService {
   final ImagePicker _picker = ImagePicker();
 
-  Future<String?> pickImageFromGallery() async {
+  Future<XFile?> pickImageFromGallery() async {
     try {
       final XFile? file = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -13,7 +13,7 @@ class ImagePickerService {
         maxHeight: 1920,
         imageQuality: 85,
       );
-      return file?.path;
+      return file;
     } catch (e) {
       if (kDebugMode) {
         print('Error picking image from gallery: $e');
@@ -22,7 +22,7 @@ class ImagePickerService {
     }
   }
 
-  Future<String?> captureImageFromCamera() async {
+  Future<XFile?> captureImageFromCamera() async {
     try {
       final XFile? file = await _picker.pickImage(
         source: ImageSource.camera,
@@ -31,7 +31,7 @@ class ImagePickerService {
         maxHeight: 1920,
         imageQuality: 85,
       );
-      return file?.path;
+      return file;
     } catch (e) {
       if (kDebugMode) {
         print('Error capturing image from camera: $e');
@@ -47,3 +47,4 @@ class ImagePickerService {
     return File(path).existsSync();
   }
 }
+

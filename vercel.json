@@ -1,7 +1,6 @@
 {
   "version": 2,
   "outputDirectory": "public",
-  "cleanUrls": true,
   "routes": [
     {
       "src": "^/assets/(.*)",
@@ -10,10 +9,6 @@
     {
       "src": "^/canvaskit/(.*)",
       "dest": "/canvaskit/$1"
-    },
-    {
-      "src": "^/(.*)",
-      "dest": "/$1"
     },
     {
       "handle": "filesystem"

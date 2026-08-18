@@ -189,50 +189,88 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // User profile + logout
-                  Consumer<AuthService>(
-                    builder: (context, auth, _) => GestureDetector(
-                      onTap: () => _showProfileSheet(context, auth),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.burgundySurface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.goldLight),
-                        ),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 13,
-                              backgroundColor: AppColors.burgundy,
-                              backgroundImage: auth.userAvatar != null
-                                  ? NetworkImage(auth.userAvatar!)
-                                  : null,
-                              child: auth.userAvatar == null
-                                  ? Text(
-                                      (auth.userName ?? auth.userEmail ?? 'U')
-                                          .substring(0, 1)
-                                          .toUpperCase(),
-                                      style: const TextStyle(
-                                          color: AppColors.gold,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  : null,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              auth.userName?.split(' ').first ?? 'You',
-                              style: const TextStyle(
-                                color: AppColors.burgundy,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
+                  // Credits & User profile
+                  Row(
+                    children: [
+                      // Direct Credits Top-up button
+                      GestureDetector(
+                        onTap: () => CreditTopupSheet.show(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.goldGradient,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.gold.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.bolt, color: AppColors.burgundy, size: 16),
+                              SizedBox(width: 4),
+                              Text(
+                                'Buy Credits',
+                                style: TextStyle(
+                                  color: AppColors.burgundy,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      // User profile + logout
+                      Consumer<AuthService>(
+                        builder: (context, auth, _) => GestureDetector(
+                          onTap: () => _showProfileSheet(context, auth),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppColors.burgundySurface,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.goldLight),
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 13,
+                                  backgroundColor: AppColors.burgundy,
+                                  backgroundImage: auth.userAvatar != null
+                                      ? NetworkImage(auth.userAvatar!)
+                                      : null,
+                                  child: auth.userAvatar == null
+                                      ? Text(
+                                          (auth.userName ?? auth.userEmail ?? 'U')
+                                              .substring(0, 1)
+                                              .toUpperCase(),
+                                          style: const TextStyle(
+                                              color: AppColors.gold,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  auth.userName?.split(' ').first ?? 'You',
+                                  style: const TextStyle(
+                                    color: AppColors.burgundy,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ).animate().fadeIn(duration: 400.ms),
