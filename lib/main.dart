@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/constants/app_config.dart';
 import 'core/theme/app_theme.dart';
 import 'screens/splash_screen.dart';
-import 'services/mock_ai_service.dart';
+import 'services/http_ai_service.dart';
 import 'services/try_on_state_manager.dart';
 import 'services/auth_service.dart';
 
@@ -11,9 +12,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(
-    url: 'https://ldzzgenjjukaoqgvfasz.supabase.co',
-    publishableKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkenpnZW5qanVrYW9xZ3ZmYXN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3MTg0ODYsImV4cCI6MjEwMjI5NDQ4Nn0.9TU2c3Zjtp5OlDkns_TzEPPhy9ktkM_IpMkArWfkRQM',
+    url: AppConfig.supabaseUrl,
+    publishableKey: AppConfig.supabaseAnonKey,
   );
 
   runApp(const JewelTryApp());
@@ -31,12 +31,14 @@ class JewelTryApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<TryOnStateManager>(
           create: (_) => TryOnStateManager(
-            aiService: MockAIService(),
+            aiService: HttpAIService(
+              baseUrl: AppConfig.backendBaseUrl,
+            ),
           ),
         ),
       ],
       child: MaterialApp(
-        title: 'JewelTry',
+        title: 'JewelTry - AI Virtual Jewelry Try-On',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         home: const SplashScreen(),
