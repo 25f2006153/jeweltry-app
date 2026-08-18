@@ -99,15 +99,23 @@ class CreditService:
     @staticmethod
     def get_user_credits(user_id: str) -> Tuple[int, int]:
         """
-        Returns (balance, reserved).
+        Returns (balance, reserved). Auto-creates 10 free credits for new accounts.
         """
         client = get_supabase_client()
         if client is not None:
             try:
                 res = client.table('credit_wallets').select('balance, reserved').eq('user_id', user_id).execute()
                 if res.data and len(res.data) > 0:
-                    row = res.data[0]
-                    return row['balance'], row['reserved']
+                    bal = res.data[0]['balance']
+                    resv = res.data[0].get('reserved', 0)
+                    return bal, resv
+                else:
+                    # Grant 10 free trial credits to new user
+                    try:
+                        client.table('credit_wallets').insert({'user_id': user_id, 'balance': 10, 'reserved': 0}).execute()
+                    except Exception:
+                        pass
+                    return 10, 0
             except Exception as e:
                 logger.error(f"Get credits error: {e}")
 

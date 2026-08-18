@@ -38,23 +38,28 @@ class _GeneratingScreenState extends State<GeneratingScreen> {
 
   void _onStateChange() {
     final stateManager = Provider.of<TryOnStateManager>(context, listen: false);
-    if (!stateManager.isGenerating && stateManager.lastResult != null && mounted) {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const ResultScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 500),
-        ),
-      );
-    } else if (stateManager.errorMessage != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(stateManager.errorMessage!),
-          backgroundColor: AppColors.error,
-        ),
-      );
+    if (!stateManager.isGenerating && mounted) {
+      if (stateManager.lastResult != null && stateManager.lastResult!.isSuccess) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => const ResultScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            transitionDuration: const Duration(milliseconds: 500),
+          ),
+        );
+      } else if (stateManager.errorMessage != null || (stateManager.lastResult != null && !stateManager.lastResult!.isSuccess)) {
+        final errorMsg = stateManager.errorMessage ?? stateManager.lastResult?.errorMessage ?? 'AI Try-On failed. Please try again.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        Navigator.of(context).pop();
+      }
     }
   }
 
